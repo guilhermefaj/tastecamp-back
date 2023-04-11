@@ -12,44 +12,25 @@ app.use(express.json()) // Os dados que trocaremos com o cliente estarão em for
 
 // Conexão com o banco de dados
 let db
-const mongoClient = new MongoClient("mongodb://localhost:27017/dbMarvel")
+const mongoClient = new MongoClient("mongodb://localhost:27017/tastecamp")
 mongoClient.connect()
     .then(() => db = mongoClient.db())
     .catch((err) => console.log(err.message))
 
 
-const receitas = [
-    {
-        id: 1,
-        titulo: "Pão com Ovo",
-        ingredientes: "Ovo e pão",
-        preparo: "Frite o ovo e coloque no pão"
-    },
-    {
-        id: 2,
-        titulo: "Pão com Whey",
-        ingredientes: "Whey e pão",
-        preparo: "Coloque Whey no pão"
-    }
-]
-
-app.get("/herois", (req, res) => {
-    db.collection("viloes").find().toArray()
-        .then(herois => res.send(herois))
-        .catch(err => res.status(500).send(err.message))
-})
-
 app.get("/receitas", (req, res) => {
-    const { ingrediente } = req.query
+    // const { ingrediente } = req.query
 
-    if (ingrediente) {
-        const receitasFiltradas = receitas.filter(
-            receita => receita.ingredientes.toLowerCase().includes(ingrediente.toLowerCase())
-        )
-        return res.send(receitasFiltradas)
-    }
+    // if (ingrediente) {
+    //     const receitasFiltradas = receitas.filter(
+    //         receita => receita.ingredientes.toLowerCase().includes(ingrediente.toLowerCase())
+    //     )
+    //     return res.send(receitasFiltradas)
+    // }
 
-    res.send(receitas)
+    db.collection("receitas").find().toArray()
+        .then(receitas => res.send(receitas))
+        .catch(err => res.status(500).send(err.message))
 })
 
 app.get("/receitas/:id", (req, res) => {
@@ -72,16 +53,11 @@ app.post("/receitas", (req, res) => {
         return res.status(422).send("Todos os campos são obrigatórios.")
     }
 
-    const novaReceita = {
-        id: receitas.length + 1,
-        titulo,
-        ingredientes,
-        preparo
-    }
+    const novaReceita = { titulo, ingredientes, preparo }
 
-    receitas.push(novaReceita)
-
-    res.status(201).send("Envio realizado com sucesso!")
+    db.collection("receitas").insertOne(novaReceita)
+        .then(() => res.sendStatus(201))
+        .catch(err => res.status(500).send(err.message))
 })
 
 const PORT = 4000 //Disponíveis: 3000 à 5999
