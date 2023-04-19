@@ -129,7 +129,7 @@ app.put("/receitas/:id", async (req, res) => {
         if (!receita) return res.sendStatus(404)
 
         // Se o criador da receita não for a pessoa que tentou editar, dá um erro
-        if (receita.idUsuario !== sessao.idUsuario) return res.sendStatus(401)
+        if (!receita.idUsuario.equals(sessao.idUsuario)) return res.sendStatus(401)
 
         const result = await db.collection("receitas").updateOne(
             { _id: new ObjectId(id) },
